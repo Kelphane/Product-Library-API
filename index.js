@@ -1,10 +1,13 @@
 const express = require("express");
 const repoContext = require("./repository/repository-wrapper");
+const {validateProduct} = require("./middleware/products-validation");
+const cors = require("cors");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cors());
 
 app.listen(3000, function() {
     console.log("Server Started. Listening on Port 3000");
@@ -25,13 +28,13 @@ app.get('/api/products/:id', (req, res) => {
     return res.send(product);
 });
 
-app.post('/api/products', (req, res) => {
+app.post('/api/products', [validateProduct],(req, res) => {
     const newProduct = req.body;
     const addedProduct = repoContext.products.createProduct(newProduct);
     return res.send(addedProduct);
 });
 
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id',  [validateProduct], (req, res) => {
     const id = req.params.id;
     const productPropertiesToUpdate = req.body;
     const updatedProduct = repoContext.products.updateProduct(id, productPropertiesToUpdate);
